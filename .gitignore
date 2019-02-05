@@ -1,0 +1,6 @@
+./users/
+./target/
+.lock
+*.swp
+*.swo
+
