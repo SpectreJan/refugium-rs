@@ -5,7 +5,8 @@ pub struct Greeting {
     pub new_greet : &'static str,
     pub goodbye : &'static str,
     pub new_thought : &'static str,
-    pub unknown_wish : &'static str
+    pub unknown_wish : &'static str,
+    pub ask_category: &'static str
 }
 
 impl Greeting {
@@ -20,6 +21,7 @@ impl Greeting {
             but may all the fortunes be with you",
             new_thought : "What's on your mind?",
             unknown_wish: "Sorry, we did dot understand you :(\nFor a list of services just type help!",
+            ask_category: "In which category does your thought belong to?"
         }
     }
 }

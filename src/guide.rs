@@ -126,18 +126,27 @@ impl Guide {
         }
 
         println!("{}", self.greetings_.goodbye);
+        let curr_user = self.user_vec_.get_mut(&self.curr_user_);
+        curr_user.unwrap().close_journal();
     }
 
 ////////////////////////////////////////////////////////////////////////////////
     fn add_thought(&mut self) {
 
+        // Get Category
+        println!("{}", self.greetings_.ask_category);
+
+        let mut category = String::new();
+        io::stdin().read_line(&mut category).expect("");
+        
+        // Get thought
         println!("{}", self.greetings_.new_thought);
 
         let mut thought = String::new();
         io::stdin().read_line(&mut thought).expect("");
 
         let curr_user = self.user_vec_.get_mut(&self.curr_user_);
-        curr_user.unwrap().add_thought(thought.as_str());
+        curr_user.unwrap().add_thought(thought.trim(), category.trim());
     }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,13 @@
 mod all_strings;
 mod user;
 mod guide;
+mod journal;
+
+#[macro_use]
+extern crate serde_derive;
+
+extern crate serde;
+extern crate serde_json;
 
 fn main() {
     let mut guide = guide::Guide::new();

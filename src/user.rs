@@ -1,10 +1,8 @@
-use std::io::Write;
-use std::io::BufRead;
-use std::fs::OpenOptions;
+use journal::Journal;
 
 pub struct User {
     name_ : String,
-    thought_ : Vec<String>,
+    journal_ : Journal
 }
 
 #[allow(dead_code)]
@@ -15,26 +13,16 @@ impl User {
 
         User {
             name_ : name.to_string(),
-            thought_ : Vec::new(),
+            journal_ : Journal::new(name)
         }
 
     }
 
 ////////////////////////////////////////////////////////////////////////////////
     pub fn init(&mut self) {
-
-        let file_op = OpenOptions::new().
-            read(true).
-            create(false).
-            open(format!("./users/{}.txt", self.name_.as_str()));
-
-        if file_op.is_ok()
+        if let Err(e) = self.journal_.init()
         {
-            let file = std::io::BufReader::new(file_op.unwrap());
-            for line in file.lines()
-            {
-                self.thought_.push(line.unwrap());
-            }
+            panic!("{}", e);
         }
     }
 
@@ -44,41 +32,20 @@ impl User {
     }
 
 ////////////////////////////////////////////////////////////////////////////////
-    pub fn add_thought(&mut self, thought : &str) {
+    pub fn add_thought(&mut self, thought : &str, category : &str) {
 
-        let file = OpenOptions::new().
-            read(true).
-            write(true).
-            append(true).
-            create(true).
-            open(format!("./users/{}.txt", self.name_.as_str()));
-        
-        let err = file.unwrap().write(format!("Thought: {}", thought).as_bytes());
-        match err
-        {
+        self.journal_.add_entry(category, thought);
 
-            Ok(_bytes) => self.thought_.push(thought.to_string()),
-            Err(e) => println!("Sorry, but we could not log your thought due to: {:?}", e)
-        }
-
-    }
-
-////////////////////////////////////////////////////////////////////////////////
-    pub fn get_thought(&self, index : usize) -> &str {
-        return self.thought_.get(index).unwrap().as_str();
     }
 
 ////////////////////////////////////////////////////////////////////////////////
     pub fn get_thoughts(&self) {
-        for thought in self.thought_.iter()
-        {
-            println!("{}", thought);
-        }
+        self.journal_.display_thoughts();
     }
 
 ////////////////////////////////////////////////////////////////////////////////
-    pub fn get_num_thoughts(&self) -> usize {
-        return self.thought_.len();
+    pub fn close_journal(&mut self) {
+        self.journal_.close();
     }
         
 }
