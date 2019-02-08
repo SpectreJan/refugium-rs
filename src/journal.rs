@@ -141,13 +141,18 @@ impl Journal {
     pub fn display_thoughts(&self) {
     
         // Iterate over Categories
+        let mut c_count: u8 = 1;
+        let mut t_count: u16;
         println!("------------------------------------------------------------");
         let categories = &self.data_.categories;
         for (k,v) in categories.iter() {
-            println!("{}:", k);
+            println!("{}. {}:", c_count, k,); 
+            c_count += 1;
+            t_count = 1;
             // Iterate over values
             for t in v.thoughts.iter() {
-                println!("{}", t.trim());
+                println!("  {}. {}", t_count, t.trim());
+                t_count += 1;
             }
             println!("");
         }
