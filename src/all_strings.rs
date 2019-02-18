@@ -36,7 +36,8 @@ pub static REFUGIUM : &'static str =
 ###########################################################";
 
 pub static HELP : &'static str = "Here are the services refugium offers:\n\n\
-                   help         -> Lists all services\n\
-                   New thought  -> Add a new thought to your journal\n\
-                   Old thoughts -> Shows your old thoughts inside your journal\n\
-                   Goodbye      -> With this you can leave the refugium";
+                   help           -> Lists all services\n\
+                   New thought    -> Add a new thought to your journal\n\
+                   Old thoughts   -> Shows your old thoughts inside your journal\n\
+                   Delete thought -> Relieves you of a thought not needed\n\
+                   Goodbye        -> With this you can leave the refugium";

@@ -1,5 +1,4 @@
 mod all_strings;
-mod user;
 mod guide;
 mod journal;
 

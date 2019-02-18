@@ -142,21 +142,90 @@ impl Journal {
     
         // Iterate over Categories
         let mut c_count: u8 = 1;
-        let mut t_count: u16;
         println!("------------------------------------------------------------");
         let categories = &self.data_.categories;
         for (k,v) in categories.iter() {
             println!("{}. {}:", c_count, k,); 
             c_count += 1;
-            t_count = 1;
-            // Iterate over values
-            for t in v.thoughts.iter() {
-                println!("  {}. {}", t_count, t.trim());
-                t_count += 1;
-            }
-            println!("");
+            Journal::list_thoughts_in_category(v);
         }
         println!("------------------------------------------------------------");
+    }
+    
+////////////////////////////////////////////////////////////////////////////////
+    pub fn display_categories(&self) {
+    
+        // Iterate over Categories
+        let mut c_count: u8 = 1;
+        println!("------------------------------------------------------------");
+        let categories = &self.data_.categories;
+        for category_name in categories.keys() {
+            println!("{}. {}", c_count, category_name); 
+            c_count += 1;
+        }
+        println!("------------------------------------------------------------");
+    }
+////////////////////////////////////////////////////////////////////////////////
+    pub fn display_thoughts_in_category(&self, category : &str)
+    {
+        let data: &JournalEntry = &self.data_;
+        let current_category = data.categories.get(category);
+
+        match current_category {
+            Some(ref cat) => Journal::list_thoughts_in_category(cat),
+            None => println!("Sorry, You do not have entries for this category!"),
+        }
+    }
+////////////////////////////////////////////////////////////////////////////////
+    fn list_thoughts_in_category(category : &JournalCategory) {
+        let mut t_count: u16 = 1;
+        let thoughts = &category.thoughts;
+        for t in thoughts {
+            println!("  {}. {}", t_count, t.trim());
+            t_count += 1;
+        }
+        println!("");
+    }
+
+////////////////////////////////////////////////////////////////////////////////
+    pub fn delete_thought(&mut self, category : &str, entry : usize) -> Result<(), String> {
+
+        let mut num_thoughts: usize;
+
+        if entry == 0
+        {
+            return Err("No Entry zero recorded".to_string());
+        }
+           
+        if self.data_.categories.contains_key(category) == true
+        {
+
+            let current_cat = self.data_.categories.get_mut(category).unwrap();
+            
+            num_thoughts = current_cat.thoughts.len();
+            if entry <= num_thoughts
+            {
+                current_cat.thoughts.remove(entry-1);
+                num_thoughts -= 1;
+            }
+            else
+            {
+                return Err(format!("Entry {} out of range for thoughts in category {}", entry, category));
+            }
+            
+        }
+        else
+        {
+            return Err(format!("I am sorry, you have not recorded a category named {} yet", category));
+        }
+
+        if num_thoughts == 0
+        {
+            self.data_.categories.remove(category);
+        }
+
+        Ok(())
+
     }
 
 }

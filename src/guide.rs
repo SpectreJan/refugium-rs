@@ -1,12 +1,12 @@
 use all_strings;
-use user;
+use journal;
 
 use std::io;
 use std::collections::HashMap;
 
 pub struct Guide {
 
-    user_vec_ : HashMap<String, user::User>,
+    user_vec_ : HashMap<String, journal::Journal>,
     greetings_ : all_strings::Greeting,
     curr_user_ : String
 }
@@ -69,18 +69,22 @@ impl Guide {
             file_string.truncate(user_name_end);
             let username = file_string.clone();
 
-            let mut old_user = user::User::new(username.as_str());
-            old_user.init();
+            let mut old_journal = journal::Journal::new(username.as_str());
+            if let Err(e) = old_journal.init() {
+                panic!("{}", e);
+            }
             // Is this copy or move??
-            self.user_vec_.insert(file_string, old_user);
+            self.user_vec_.insert(file_string, old_journal);
         }
 
         if self.user_vec_.contains_key(curr_name.as_str()) == false
         {
             println!("Hello {} {}", curr_name.trim(), self.greetings_.new_greet);
-            let mut new_user = user::User::new(curr_name.as_str());
-            new_user.init();
-            self.user_vec_.insert(curr_name.to_string(), new_user);
+            let mut new_journal = journal::Journal::new(curr_name.as_str());
+            if let Err(e) = new_journal.init() {
+                panic!("{}", e);
+            }
+            self.user_vec_.insert(curr_name.to_string(), new_journal);
         }
         else
         {
@@ -115,19 +119,20 @@ impl Guide {
 
             match entry_lower.trim().as_ref()
             {
-                "goodbye"      => quit = Guide::quit(),
-                "new thought"  => self.add_thought(),
-                "old thoughts" => self.get_thoughts(),
-                "help"         => Guide::get_offers(),
-                ""             => quit = Guide::quit(),
-                _              => println!("{}", self.greetings_.unknown_wish)
+                "goodbye"        => quit = Guide::quit(),
+                "new thought"    => self.add_thought(),
+                "old thoughts"   => self.get_thoughts(),
+                "delete thought" => self.delete_thought(),
+                "help"           => Guide::get_offers(),
+                ""               => quit = Guide::quit(),
+                _                => println!("{}", self.greetings_.unknown_wish)
             }
 
         }
 
         println!("{}", self.greetings_.goodbye);
-        let curr_user = self.user_vec_.get_mut(&self.curr_user_);
-        curr_user.unwrap().close_journal();
+        let curr_journal = self.user_vec_.get_mut(&self.curr_user_);
+        curr_journal.unwrap().close();
     }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,15 +151,47 @@ impl Guide {
         io::stdin().read_line(&mut thought).expect("");
 
         let curr_user = self.user_vec_.get_mut(&self.curr_user_);
-        curr_user.unwrap().add_thought(thought.trim(), category.trim());
+        curr_user.unwrap().add_entry(category.trim(), thought.trim());
     }
 
 ////////////////////////////////////////////////////////////////////////////////
     fn get_thoughts(&mut self) {
         let curr_user = self.user_vec_.get_mut(&self.curr_user_);
-        curr_user.unwrap().get_thoughts();
+        curr_user.unwrap().display_thoughts();
     }
 
+////////////////////////////////////////////////////////////////////////////////
+    fn delete_thought(&mut self) {
+        let mut category = String::new();
+
+        println!("You want to be relieved of a thought?\n\
+                Tell me, in which category do we find it?");
+
+        {
+            let curr_user = self.user_vec_.get(&self.curr_user_);
+            curr_user.unwrap().display_categories();
+        
+            io::stdin().read_line(&mut category).expect("");
+            curr_user.unwrap().display_thoughts_in_category(category.as_str().trim());
+        }
+
+        println!("What particular thought do you want to get rid of? Just tell me its number!");
+        let mut thought = String::new();
+        io::stdin().read_line(&mut thought).expect("");
+        let t_number = thought.trim();
+        if let Ok(i) = t_number.parse::<usize>() {
+            let mut curr_user = self.user_vec_.get_mut(&self.curr_user_).unwrap();
+            if let Err(e) = curr_user.delete_thought(category.as_str().trim(), i)
+            {
+                println!("{}", e);
+            }
+        }
+        else
+        {
+            println!("this was not an integer: {}", t_number)
+        }
+
+    }
 ////////////////////////////////////////////////////////////////////////////////
     fn get_offers() {
 
