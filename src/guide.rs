@@ -46,15 +46,27 @@ impl Guide {
 
         let mut curr_name = String::new();
 
-        if let Err(e) = io::stdin().read_line(&mut curr_name)
-        { 
-            // Any Error here sucks cause without proper user name
-            // no chicken dinner
-            println!("Error Reading Username from keyboard: {}", e);
-            return Err(1);
-        }
+        loop
+        {
+            if let Err(e) = io::stdin().read_line(&mut curr_name)
+            {
+                // Any Error here sucks cause without proper user name
+                // no chicken dinner
+                println!("Error Reading Username from keyboard: {}", e);
+                return Err(1);
+            }
 
-        curr_name.pop();
+            curr_name.pop();
+
+            if curr_name.is_empty()
+            {
+                println!("I am sorry, an empty name is not a good name, choose a different one");
+            }
+            else
+            {
+                break;
+            }
+        }
 
         let files = std::fs::read_dir("./users/").unwrap();
         for file in files
@@ -80,10 +92,7 @@ impl Guide {
         if self.user_vec_.contains_key(curr_name.as_str()) == false
         {
             println!("Hello {} {}", curr_name.trim(), self.greetings_.new_greet);
-            let mut new_journal = journal::Journal::new(curr_name.as_str());
-            if let Err(e) = new_journal.init() {
-                panic!("{}", e);
-            }
+            let new_journal = journal::Journal::new(curr_name.as_str());
             self.user_vec_.insert(curr_name.to_string(), new_journal);
         }
         else
