@@ -1,6 +1,7 @@
 mod all_strings;
 mod guide;
 mod journal;
+mod fstorage;
 
 #[macro_use]
 extern crate serde_derive;

@@ -1,9 +1,7 @@
 //use serde::{Serialize, Deserialize};
+use fstorage::FileHandler;
+
 use serde_json;
-
-use std::io::Write;
-use std::fs::OpenOptions;
-
 use std::collections::HashMap;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +28,8 @@ struct JournalEntry {
 ////////////////////////////////////////////////////////////////////////////////
 pub struct Journal {
     user_ : String,
-    data_ : JournalEntry
+    data_ : JournalEntry,
+    file_handle_ : FileHandler
 }
 
 #[allow(dead_code)]
@@ -43,7 +42,8 @@ impl Journal {
 
             user_ : user.to_string(),
             data_ : JournalEntry{user: user.to_string(),
-                categories: HashMap::new()}
+                categories: HashMap::new()},
+            file_handle_ : FileHandler::new(user)
 
         }
 
@@ -52,69 +52,40 @@ impl Journal {
 ////////////////////////////////////////////////////////////////////////////////
     pub fn close(&mut self) {
 
-        let file_op = OpenOptions::new().
-            write(true).
-            create(true).
-            open(format!("./users/{}.json", self.user_.as_str()));
         
-        if file_op.is_ok()
+        let j = serde_json::to_string_pretty(&self.data_);
+        let write_result = self.file_handle_.process_and_write_data(j.unwrap().to_string());
+        
+        if write_result.is_err()
         {
-            let mut file = file_op.unwrap();
-
-            // Erase content of file
-            if let Ok(())  = file.set_len(0)
-            {
-                
-                let j = serde_json::to_string_pretty(&self.data_);
-            
-
-                if let Err(e) = file.write(j.unwrap().as_bytes())
-                {
-                    println!("Sorry, but we could not backup your thoughts due to: {:?}", e)
-                }
-            }
+            println!("Error: {}", write_result.unwrap_err());
         }
-
+           
     }
 
 ////////////////////////////////////////////////////////////////////////////////
     pub fn init(&mut self) -> std::result::Result<(), String> {
+    
+        let content_result = self.file_handle_.read_data();
 
-        let file_op = OpenOptions::new().
-            read(true).
-            create(false).
-            open(format!("./users/{}.json", self.user_.as_str()));
-        
-        if file_op.is_ok()
+        if content_result.is_ok()
         {
-            // Result of opening file was OK
-            use std::io::Read;
-            let mut file = std::io::BufReader::new(file_op.unwrap());
-            let mut content = String::new();
-            if let Ok(_size) = file.read_to_string(&mut content)
+            let content = content_result.unwrap();
+            let parse_result: serde_json::Result<JournalEntry> = serde_json::from_str(&content);
+
+            if parse_result.is_err()
             {
-
-                let parse_result: serde_json::Result<JournalEntry> = serde_json::from_str(&content);
-
-                if parse_result.is_err()
-                {
-                    let e = parse_result.unwrap_err();
-                    println!("Journal found, but could not parse content due to {}", e);
-                }
-                else
-                {
-                    self.data_ = parse_result.unwrap();
-                }
+                let e = parse_result.unwrap_err();
+                println!("Journal found, but could not parse content due to {}", e);
             }
-
+            else
+            {
+                self.data_ = parse_result.unwrap();
+            }
         }
         else
         {
-            let e = file_op.unwrap_err();
-            if e.kind() != std::io::ErrorKind::NotFound
-            {
-                return Err(format!("Could not read present journal of {} due to error {}", self.user_, e));
-            }
+            return Err(format!("Could not read present journal of {} due to error {}", self.user_, content_result.unwrap_err()));
         }
 
         Ok(())
