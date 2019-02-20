@@ -8,12 +8,18 @@ Therfor the journal application is set to guide the person through the whole pro
 rather than just a bunch of commands.
 
 ## State
-The App is really really Pre-Alpha. Usage is pretty much limited to writing down unstructured thoughts and listing all old thoughts in chronological order.
+The App is really really Pre-Alpha. It now can store one's thoughts and put them into categories! You can also delete old thoughts one by one. The Journal is stored in json files in the user dict in the source tree. Lazy af Jan now thinks (while editing this README), that it should get stored somewhere else...I'll put it in [Further Development](#further-development)
 There is also some serious dead code, e.g. journal.rs is useless right now as I am in the middle of a rewrite.
 
 ## Prerequisites
 1. cargo
 2. rustc > 1.29
+
+Via cargo it also pulls:
+
+1. serde
+2. serde_derive
+3. serde_json
 
 That should be it for the moment.
 ```
@@ -52,7 +58,8 @@ Pressing **enter** or typing `Goodbye` will end the program
 
 ## Further Development
 No Promises are made...I might get bored or scared by the project and it might succumb to the slow death of repository rot!
-The Journal now has categories. Which is nice. But encrypted files? Who knows! Maybe later. If any poor soul has found its way to this README. I have no Idea about crypto and for sure need help...I was (naively) thinking (10 sec coherent thoughts max)
+The Journal now has categories. Which is nice. The storage location need to be changed though.<br> 
+But encrypted files? Who knows! Maybe later. If any poor soul has found its way to this README. I have no Idea about crypto and for sure need help...I was (naively) thinking (10 sec coherent thoughts max)
 
 Encryption:
 
