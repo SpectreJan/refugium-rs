@@ -137,14 +137,19 @@ impl Journal {
         println!("------------------------------------------------------------");
     }
 ////////////////////////////////////////////////////////////////////////////////
-    pub fn display_thoughts_in_category(&self, category : &str)
+    pub fn display_thoughts_in_category(&self, category : &str) -> Result<(), &'static str>
     {
         let data: &JournalEntry = &self.data_;
         let current_category = data.categories.get(category);
 
         match current_category {
-            Some(ref cat) => Journal::list_thoughts_in_category(cat),
-            None => println!("Sorry, You do not have entries for this category!"),
+            Some(ref cat) => {
+                Journal::list_thoughts_in_category(cat);
+                Ok(())
+            }
+            None => {
+                Err("Sorry, You do not have entries for this category!")
+            }
         }
     }
 ////////////////////////////////////////////////////////////////////////////////
@@ -167,7 +172,7 @@ impl Journal {
         {
             return Err("No Entry zero recorded".to_string());
         }
-           
+
         if self.data_.categories.contains_key(category) == true
         {
 

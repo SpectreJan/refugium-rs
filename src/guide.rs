@@ -160,7 +160,8 @@ impl Guide {
         io::stdin().read_line(&mut thought).expect("");
 
         let curr_user = self.user_vec_.get_mut(&self.curr_user_);
-        curr_user.unwrap().add_entry(category.trim(), thought.trim());
+        curr_user.unwrap().add_entry(category.trim(),
+                        thought.trim());
     }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +182,17 @@ impl Guide {
             curr_user.unwrap().display_categories();
         
             io::stdin().read_line(&mut category).expect("");
-            curr_user.unwrap().display_thoughts_in_category(category.as_str().trim());
+
+            let ret = curr_user.unwrap().
+                display_thoughts_in_category(category.as_str().trim());
+
+            match ret {
+               Ok(()) => (),
+                Err(s) => {
+                    println!("Error: {}", s);
+                    return;
+                }
+            }
         }
 
         println!("What particular thought do you want to get rid of? Just tell me its number!");
